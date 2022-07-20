@@ -33,7 +33,7 @@ export async function getGames(req,res){
 }
 
 
-export async function postGames(req,res){
+export async function postGame(req,res){
     const newGame = res.locals.newGame;
     try{
         await db.query('INSERT INTO games (name,image,"stockTotal","categoryId","pricePerDay") VALUES ($1,$2,$3,$4,$5)',

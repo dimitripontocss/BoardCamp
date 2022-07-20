@@ -1,11 +1,11 @@
 import { Router } from "express";
 
-import { getCategories, postCategories } from "../controllers/categoriesController.js";
-import { validateCategories } from "../middlewares/validateCategories.js";
+import { getCategories, postCategorie } from "../controllers/categoriesController.js";
+import { validateCategorie } from "../middlewares/validateCategorie.js";
 
 const router = Router();
 
 router.get("/categories", getCategories);
-router.post("/categories", validateCategories, postCategories);
+router.post("/categories", validateCategorie, postCategorie);
 
 export default router;

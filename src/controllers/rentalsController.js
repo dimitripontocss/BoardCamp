@@ -52,7 +52,7 @@ export async function getRentals(req,res){
     }  
 }
 
-export async function postRentals(req,res){
+export async function postRental(req,res){
     try{   
         const newRental =res.locals.newRental;
         const gameExist =res.locals.gameExist;

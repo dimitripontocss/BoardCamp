@@ -11,7 +11,7 @@ export async function getCategories(req,res){
     }  
 }
 
-export async function postCategories(req,res){
+export async function postCategorie(req,res){
     try{
         const name = res.locals.name;
         await db.query("INSERT INTO categories (name) VALUES ($1)", [name]);

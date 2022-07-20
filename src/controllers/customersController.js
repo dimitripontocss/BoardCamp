@@ -14,7 +14,7 @@ export async function getCustomers(req,res){
     }  
 }
 
-export async function getCustomersById(req,res){
+export async function getCustomerById(req,res){
     const id = req.params.id;
     try{
         const customer = await db.query("SELECT * FROM customers WHERE id=$1",[id]);
@@ -32,7 +32,7 @@ export async function getCustomersById(req,res){
     }  
 }
 
-export async function postCustomers(req,res){
+export async function postCustomer(req,res){
     const newCustomer = res.locals.newCustomer;
     try{
         await db.query('INSERT INTO customers (name,phone,cpf,birthday) VALUES ($1,$2,$3,$4)',

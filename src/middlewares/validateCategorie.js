@@ -5,7 +5,7 @@ import categorieSchema from "../schemas/categorieSchema.js"
 import ApiError from "../utils/apiError.js";
 import handleError from "../utils/handleError.js";
 
-export async function validateCategories(req,res,next){
+export async function validateCategorie(req,res,next){
     const { name } = req.body;
     try{
         const { error } = categorieSchema.validate(req.body);
