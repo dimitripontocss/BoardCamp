@@ -2,7 +2,6 @@ import dayjs from "dayjs";
 
 import db from "../database/postgres.js";
 
-import ApiError from "../utils/apiError.js";
 import handleError from "../utils/handleError.js";
 
 async function transformRentals(rental){
@@ -27,10 +26,21 @@ async function transformRentals(rental){
     return sendableRental;
 }
 
-//Falta a query
 export async function getRentals(req,res){
+    const customerId = req.query.customerId;
+    const gameId = req.query.gameId;
     try{
-        const rentals = await db.query("SELECT * FROM rentals");
+        let rentals = [];
+        if(customerId === undefined && gameId === undefined){
+            rentals = await db.query("SELECT * FROM rentals");
+        }
+        if(customerId !== undefined){
+            rentals = await db.query('SELECT * FROM rentals WHERE "customerId" = $1',[customerId]);
+        }
+        if(gameId !== undefined){
+            rentals = await db.query('SELECT * FROM rentals WHERE "gameId" = $1',[gameId]);
+        }
+        
         let treatedRentals = [];
         for(let i=0;i<rentals.rows.length;i++){
             const treatedRental = await transformRentals(rentals.rows[i]);
@@ -43,23 +53,9 @@ export async function getRentals(req,res){
 }
 
 export async function postRentals(req,res){
-    const newRental = req.body;
     try{   
-        const gameExist = await db.query("SELECT * FROM games WHERE id = $1", [newRental.gameId]);
-        if(gameExist.rows.length === 0){
-            throw new ApiError("Não existe um jogo com esse ID.",400);
-        }
-        const customerExist = await db.query("SELECT * FROM customers WHERE id = $1", [newRental.customerId]);
-        if(customerExist.rows.length === 0){
-            throw new ApiError("Não existe um cliente com esse ID.",400);
-        }
-
-        if(newRental.daysRented <= 0){
-            throw new ApiError("Selecione uma data valida para aluguel.",400);
-        }
-        if(gameExist.rows[0].stockTotal === 0){
-            throw new ApiError("Este jogo não está disponível para aluguel.",400);
-        }
+        const newRental =res.locals.newRental;
+        const gameExist =res.locals.gameExist;
 
         const date = dayjs().format('YYYY-MM-DD');
         const price = newRental.daysRented * gameExist.rows[0].pricePerDay;
@@ -73,26 +69,14 @@ export async function postRentals(req,res){
 
     }catch(error){
         console.log(error);
-		if(error instanceof ApiError){
-			const {status ,message} = error;
-			return handleError({status, message, res});
-		}
 		return handleError({status:500, msg:error.message, res}) 
     }
 }
 
 export async function returnRental(req,res){
-    const id = req.params.id;
     try{   
-        const possibleRental = await db.query('SELECT * FROM rentals WHERE id=$1',[id]);
-        if(possibleRental.rows.length === 0){
-            throw new ApiError("Não existem alugueis com esse ID.",404);
-        }
-        const rental = possibleRental.rows[0];
-        
-        if(rental.returnDate !== null){
-            throw new ApiError("Aluguel já foi finalizado.",400);
-        }
+        const rental = res.locals.rental;
+        const id = res.locals.id;
         
         const dayDiff = Math.ceil((Date.now()-rental.rentDate.getTime()) / (1000*3600*24));
         const date = dayjs().format('YYYY-MM-DD');
@@ -104,26 +88,14 @@ export async function returnRental(req,res){
         res.sendStatus(201);
     }catch(error){
         console.log(error);
-		if(error instanceof ApiError){
-			const {status ,message} = error;
-			return handleError({status, message, res});
-		}
 		return handleError({status:500, msg:error.message, res}) 
     }
 }
 
 export async function deleteRental(req,res){
-    const id = req.params.id;
     try{   
-        const possibleRental = await db.query('SELECT * FROM rentals WHERE id=$1',[id]);
-        if(possibleRental.rows.length === 0){
-            throw new ApiError("Não existem alugueis com esse ID.",404);
-        }
-        const rental = possibleRental.rows[0];
-                
-        if(rental.returnDate !== null){
-            throw new ApiError("Aluguel já foi finalizado.",400);
-        }
+        const rental = res.locals.rental;
+        const id = res.locals.id;
 
         const game = await db.query('SELECT * FROM games WHERE id=$1',[rental.gameId]);
         await db.query('UPDATE games SET "stockTotal"=$1 WHERE id=$2',[game.rows[0].stockTotal + 1, rental.gameId]);
@@ -132,10 +104,6 @@ export async function deleteRental(req,res){
         res.sendStatus(200);
     }catch(error){
         console.log(error);
-		if(error instanceof ApiError){
-			const {status ,message} = error;
-			return handleError({status, message, res});
-		}
 		return handleError({status:500, msg:error.message, res}) 
     }
 }
