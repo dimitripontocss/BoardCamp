@@ -1,6 +1,6 @@
 import db from "../database/postgres.js";
 
-import categorieSchema from "../schemas/categoriesSchema.js";
+import categorieSchema from "../schemas/categorieSchema.js";
 
 import handleError from "../utils/handleError.js"
 import ApiError from "../utils/apiError.js"

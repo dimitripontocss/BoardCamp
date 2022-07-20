@@ -4,7 +4,7 @@ import { getCategories, postCategories } from "../controllers/categoriesControll
 
 const router = Router();
 
-router.post("/categories",postCategories);
 router.get("/categories",getCategories);
+router.post("/categories",postCategories);
 
 export default router;
