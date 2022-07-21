@@ -17,10 +17,17 @@ async function correctObject(game){
     return sendableGame;
 }
 
-//Falta a query
 export async function getGames(req,res){
+    const name = req.query.name.toLowerCase();
     try{
-        const games = await db.query("SELECT * FROM games");
+        let games = [];
+        if(name){
+            console.log(name)
+            games = await db.query('SELECT * FROM games WHERE LOWER(name) LIKE $1',[name + '%']);
+        }
+        else{
+            games = await db.query("SELECT * FROM games");
+        }
         let treatedGames = [];
         for(let i=0;i<games.rows.length;i++){
             const treatedGame = await correctObject(games.rows[i]);

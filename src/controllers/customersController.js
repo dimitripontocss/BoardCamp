@@ -6,8 +6,14 @@ import ApiError from "../utils/apiError.js";
 
 //Falta a query
 export async function getCustomers(req,res){
+    const cpf = req.query.cpf;
     try{
-        const customers = await db.query("SELECT * FROM customers");
+        let customers = [];
+        if(cpf){
+            customers = await db.query('SELECT * FROM customers WHERE cpf LIKE $1',[cpf + '%']);
+        }else{
+            customers = await db.query("SELECT * FROM customers");
+        }
         res.send(customers.rows);
     }catch(error){
         return handleError({status:500, msg:error.message, res})
