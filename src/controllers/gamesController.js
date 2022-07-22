@@ -2,37 +2,17 @@ import db from "../database/postgres.js";
 
 import handleError from "../utils/handleError.js"
 
-async function correctObject(game){
-    const category = await db.query("SELECT * FROM categories WHERE id = $1", [game.categoryId]);
-    const categoryName = category.rows[0].name;
-    const sendableGame = {
-        id: game.id,
-        name: game.name,
-        image:  game.image,
-        stockTotal: game.stockTotal,
-        categoryId: game.categoryId,
-        pricePerDay: game.pricePerDay,
-        categoryName
-    }
-    return sendableGame;
-}
-
 export async function getGames(req,res){
     const name = req.query.name;
     try{
         let games = [];
         if(name){
-            games = await db.query('SELECT * FROM games WHERE LOWER(name) LIKE $1',[name.toLowerCase() + '%']);
+            games = await db.query('SELECT games.*, categories.name as "categoryName" FROM games JOIN categories ON games."categoryId"=categories.id WHERE LOWER(games.name) LIKE $1',[name.toLowerCase() + '%']);
         }
         else{
-            games = await db.query("SELECT * FROM games");
+            games = await db.query('SELECT games.*, categories.name as "categoryName" FROM games JOIN categories ON games."categoryId"=categories.id ');
         }
-        let treatedGames = [];
-        for(let i=0;i<games.rows.length;i++){
-            const treatedGame = await correctObject(games.rows[i]);
-            treatedGames.push(treatedGame);
-        }
-        res.send(treatedGames);
+        res.send(games.rows);
     }catch(error){
         return handleError({status:500, msg:error.message, res})
     }  

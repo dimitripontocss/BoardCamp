@@ -3,8 +3,6 @@ import db from "../database/postgres.js";
 import handleError from "../utils/handleError.js";
 import ApiError from "../utils/apiError.js";
 
-
-//Falta a query
 export async function getCustomers(req,res){
     const cpf = req.query.cpf;
     try{
